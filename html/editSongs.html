@@ -1,0 +1,106 @@
+<form id="edit_songs_form">
+  <div class="songsContainer">
+    <div class="form-group row songRow">
+      <div class="inputs">
+        <div class="col">
+          <label for="urlSong" class="col-2 col-form-label">Song URL</label>
+          <input class="form-control urlSong" id="urlSong" type="text" placeholder="Enter URL" required>
+        </div>
+        <div class="col">
+          <label for="songName" class="col-1 col-form-label">Name</label>
+          <input class="form-control songName" id="songName" type="text" placeholder="Enter name" required>
+        </div>
+      </div>
+      <div class="remove-song-btn">
+        <button class="remove-row far fa-trash-alt"></button>
+      </div>
+    </div>
+  </div>
+  <div class="addAndFinish">
+    <button id="add_another_song" class="editBtns bottom-btns">Add Song</button>
+    <input class="editBtns bottom-btns" type="submit" value="FINISH & SAVE">
+  </div>
+</form>
+
+<script>
+  let songsList = localStorage.getItem('songsList');
+  songsList = JSON.parse(songsList);
+  $.each(songsList, function (index, value) {
+    embed(value);
+    cloneRow();
+  });
+  $('.songRow').last().remove();
+
+  $("#add_another_song").click(function (e) {
+    e.preventDefault();
+    cloneRow();
+    // console.log(document.querySelectorAll('.songRow').length)
+  });
+
+  $(".remove-row").click(function (e) {
+    e.preventDefault();
+    if (document.querySelectorAll('.songRow').length > 1) {
+      e.target.parentElement.parentElement.remove();
+      console.log(e)
+    } else {
+      $('<p>', {
+        text: `The last song can NOT be deleted`,
+        class: 'errorParagraph',
+        css: {'color': 'red'}
+      }).insertAfter($('.songRow'));
+      setTimeout(() => {
+        $('.errorParagraph').fadeOut('slow', function () {
+          $('.errorParagraph').remove();
+        });
+      }, 3000)
+
+    }
+  });
+
+  $("#edit_songs_form").submit(function (e) {
+    e.preventDefault();
+
+    const id = e.target.dataset.play_id;
+    const imgUrl = $('.player-image').attr('src')
+    const playlistName = $('.player-title').text();
+
+    let updateList = songs();
+    updateList = JSON.stringify(updateList);
+
+    const updateAct = $.post('api/playlist/' + id + '/songs', updateList);
+
+    updateAct.then(function () {
+      new Player(id, playlistName, imgUrl);
+    })
+    $('.popupCon').remove();
+  });
+
+  function songs() {
+    var obj = {
+      "songs": []
+    };
+    const nameArray = document.querySelectorAll('.songName');
+    const urlArray = document.querySelectorAll('.urlSong');
+
+    for (let i = 0, length1 = nameArray.length; i < length1; i++) {
+      obj.songs.push({
+        name: nameArray[i].value,
+        url: urlArray[i].value
+      });
+    }
+    return obj
+  }
+
+  function cloneRow() {
+    $('.songRow:first').clone(true).appendTo('.songsContainer');
+    $('.urlSong').last().val("");
+    $('.songName').last().val("");
+  }
+
+  function embed(value) {
+    const url = value.url;
+    const name = value.name;
+    $('.urlSong').last().val(url);
+    $('.songName').last().val(name);
+  }
+</script>

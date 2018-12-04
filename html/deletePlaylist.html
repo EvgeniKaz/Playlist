@@ -1,0 +1,39 @@
+<div class="wrapper">
+  <div id="deletePopup">
+    <p>Are You Sure?</p>
+    <p>Do you really want to delete these records? This process cannot be undone.</p>
+    <div id="DeleteBtns">
+      <button class="cancelBtn bottom-btns">Cancel</button>
+      <button id="deleteConfirmBtn" class="bottom-btns delete-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  $('#deleteConfirmBtn').click(function(e) {
+		e.preventDefault();
+		const id = e.target.parentElement.dataset.id;
+    deletePlaylist(id);
+    $('.popupCon').remove();
+    $('.container').remove();
+  });
+
+  $('.cancelBtn').click(function(e) {
+		e.preventDefault();
+		$('.popupCon').remove();
+	});
+  
+
+  const deletePlaylist = (id) => {
+    $.ajax({
+			method: 'DELETE',
+			url: "api/playlist/" + id,
+			success: function(response) {
+			}
+		})
+		.then(() => {
+			var update = new Update()
+			update.initPage()
+		})
+  }
+</script>

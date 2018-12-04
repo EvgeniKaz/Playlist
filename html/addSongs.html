@@ -1,0 +1,87 @@
+<form id="addSongsForm">
+  <div class="form-sec2">
+    <h4>Add Playlist Songs</h4>
+    <div class="songsContainer">
+      <div class="form-group songRow">
+        <div class="col">
+          <input type="text" class="form-control song-name" id="song-name" name="song-name" placeholder="Enter Song Name">
+        </div>
+        <div class="col">
+          <input type="text" class="form-control song-url" id="song-url" name="song-url" placeholder="Enter Song URL">
+        </div>
+      </div>
+    </div>
+    <button class="btn addSongBtn"><i class="fas fa-plus-circle"></i> Add New Song</button>
+    <div class="form-group">
+      <button class="bottom-btns" id="save">Save & Submit</button>
+    </div>
+    <div class="error-span"></div>
+  </div>
+</form>
+
+<script>
+  $(".addSongBtn").click(function (e) {
+    e.preventDefault();
+    $(".songRow").first().clone(true).appendTo('.songsContainer');
+  });
+
+  // ------------------------------------ //
+
+  let postNew = localStorage.getItem('temp');
+  postNew = JSON.parse(postNew);
+
+  $("#addSongsForm").submit(function (e) {
+    e.preventDefault();
+    $('.errorSpan').remove();
+
+    postNew = songs(postNew);
+    
+    if (!postNew.songs[0].name && !postNew.songs[0].url) {
+      $('<span>', { 
+          class: 'errorSpan', 
+          text: 'Plaese add at least one song',
+          css: {'color': 'red'}
+        }).appendTo($('.error-span'))
+    } else if (!/\.mp3/.test(postNew.songs[0].url)) {
+      $('<span>', { 
+          class: 'errorSpan', 
+          text: 'The songs most be mp3 format',
+          css: {'color': 'red'}
+        }).appendTo($('.error-span'))
+    } else {
+      postNew = JSON.stringify(postNew);
+      const updateAct = $.post('api/playlist', postNew);
+    
+      updateAct.then(function () {
+        const update = new Update()
+        update.initPage()
+      })
+      const formPopup = new DynamicPopup();
+      formPopup.closeFormPopup();
+    }
+  });
+
+
+  function songs(obj) {
+    const nameArray = document.querySelectorAll('.song-name');
+    const urlArray = document.querySelectorAll('.song-url');
+    obj.songs = [];
+
+    for (let i = 0; i < nameArray.length; i++) {
+      obj.songs.push({
+        name: nameArray[i].value,
+        url: urlArray[i].value
+      });
+    }
+    return obj
+  }
+
+  // function removeRow(e) {
+  //   e.preventDefault();
+  //   if ($('.songRow').length > 1) {
+  //     e.target.parentNode.remove();
+  //   } else {
+  //     alert("You can't remove the last row")
+  //   }
+  // }
+</script>

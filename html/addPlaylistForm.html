@@ -1,0 +1,74 @@
+<form id="addPlaylistForm">
+  <div class="form-section">
+    <h4>Add New Playlist</h4>
+    <div class="form-group">
+      <label for="playlist-name">Playlist Name</label>
+      <input type="text" class="form-control" id="playlist-name" placeholder="Enter Playlist">
+    </div>
+    <div class="form-group">
+      <label for="playlist-url">Playlist Image URL</label>
+      <input type="text" class="form-control" id="playlist-url" placeholder="Playlist URL">
+    </div>
+    <div class="form-group">
+      <button class="bottom-btns" id="reset">Reset Fields</button>
+      <button class="bottom-btns" id="next">Next</button>
+    </div>
+    <div class="span"></div>
+  </div>
+  <div class="preview">
+    <img src="./playlist.jpg" alt="preview" class="previewImg">
+  </div>
+</form>
+
+<script>
+  $('#addPlaylistForm').submit(function (e) {
+    e.preventDefault();
+    $('.error').remove();
+    const name = $('#playlist-name').val()
+    const url = $('#playlist-url').val()
+    if (name && url) {
+      toJsonInLocalStorage();
+      var popup = new DynamicPopup('./html/addSongs.html');
+      popup.closeFormPopup();
+      popup.build();
+    } else {
+      $('<span>', { 
+        class: 'error', 
+        text: 'All fields required',
+        css: {'color': 'red'}
+      }).appendTo($('.span'))
+    }
+  });
+
+  $('#reset').click(function (event) {
+    event.preventDefault();
+    $('#playlist-name').val('');
+    $('#playlist-url').val('');
+  });
+
+  $(document).on('input', '#playlist-url', function () {
+    var preview = $('.preview')
+    preview.empty();
+    preview.append(
+      $('<img>', {
+        src: this.value,
+        class: 'previewImg',
+      })
+    )
+    $('.previewImg').on('error', function (event) {
+      event.preventDefault();
+      $(this).attr('src', './playlist.jpg')
+    });
+  });
+
+  // ----------------------------------- //
+
+  function toJsonInLocalStorage() {
+    var temp = {
+      name: $('#playlist-name').val(),
+      image: $('#playlist-url').val(),
+      songs: []
+    };
+    localStorage.setItem('temp', JSON.stringify(temp));
+  }
+</script>
